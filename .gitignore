@@ -1,0 +1,17 @@
+cat > .gitignore << 'EOF'
+# Compiled programs
+knot_calc
+*.o
+*.out
+a.out
+
+# Editor files
+*.swp
+*~
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+EOF
