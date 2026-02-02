@@ -40,6 +40,24 @@ public:
                       << " (sign: " << (c.sign > 0 ? "+" : "-") << ")\n";
         }
     }
+
+    // Parse Dowker-Thistlethwaite notation
+    static KnotDiagram from_dt(const std::vector<int>& dt_notation) {
+        KnotDiagram knot;
+    
+        // Each position in DT notation represents a crossing
+        for (size_t i = 0; i < dt_notation.size(); i++) {
+            int value = dt_notation[i];
+        
+            // Sign of the crossing: positive if value > 0, negative if value < 0
+            int sign = (value > 0) ? 1 : -1;
+        
+            // Add the crossing (index i, with determined sign)
+            knot.add_crossing(i, sign);
+        }
+    
+        return knot;
+    }
 };
 
 #endif

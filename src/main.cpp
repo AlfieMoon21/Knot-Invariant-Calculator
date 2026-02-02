@@ -1,22 +1,29 @@
 #include <iostream>
+#include <vector>
 #include "../include/knot.h"
 
 int main() {
-    std::cout << "=== Testing Knot Structure ===" << std::endl;
+    std::cout << "=== Testing DT Notation Parser ===" << std::endl;
     
-    // Create a trefoil knot
-    // DT notation: [4, 6, 2]
-    // This means 3 crossings, all positive
-    KnotDiagram trefoil;
-    trefoil.add_crossing(0, 1);  // Crossing 1, positive
-    trefoil.add_crossing(1, 1);  // Crossing 2, positive
-    trefoil.add_crossing(2, 1);  // Crossing 3, positive
-    
-    std::cout << "\nTrefoil knot:" << std::endl;
+    // Test 1: Trefoil [4, 6, 2]
+    std::cout << "\nTest 1: Trefoil [4, 6, 2]" << std::endl;
+    std::vector<int> trefoil_dt = {4, 6, 2};
+    KnotDiagram trefoil = KnotDiagram::from_dt(trefoil_dt);
     trefoil.print();
     
-    std::cout << "\nNumber of crossings: " << trefoil.size() << std::endl;
-    std::cout << "Is empty? " << (trefoil.is_empty() ? "Yes" : "No") << std::endl;
+    // Test 2: Figure-eight [4, 6, 8, 2]
+    std::cout << "\nTest 2: Figure-eight [4, 6, 8, 2]" << std::endl;
+    std::vector<int> figure8_dt = {4, 6, 8, 2};
+    KnotDiagram figure8 = KnotDiagram::from_dt(figure8_dt);
+    figure8.print();
+    
+    // Test 3: Mixed signs [4, -6, 2]
+    std::cout << "\nTest 3: Mixed signs [4, -6, 2]" << std::endl;
+    std::vector<int> mixed_dt = {4, -6, 2};
+    KnotDiagram mixed = KnotDiagram::from_dt(mixed_dt);
+    mixed.print();
+    
+    std::cout << "\n=== All Tests Complete ===" << std::endl;
     
     return 0;
 }
