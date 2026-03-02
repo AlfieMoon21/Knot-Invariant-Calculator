@@ -10,9 +10,13 @@
 
 **Smoothing** = removing a crossing by reconnecting strands
 
+**[IMAGE PLACEHOLDER: Before/after diagram showing a crossing being smoothed]**
+
 ### Two Types of Smoothing
 
 **A-smoothing:** Connect strands going the "same way"
+
+**[IMAGE PLACEHOLDER: A-smoothing diagram showing strand separation]**
 ```
 Original:    A-smooth:
     |           ) (
@@ -21,6 +25,8 @@ Original:    A-smooth:
 ```
 
 **B-smoothing:** Connect strands going "opposite ways"
+
+**[IMAGE PLACEHOLDER: B-smoothing diagram showing strand connection]**
 ```
 Original:    B-smooth:
     |           \ /
@@ -55,9 +61,13 @@ Polynomial kauffman_bracket(int num_crossings) {
 - Merge circles together
 - Change the topology
 
+**[IMAGE PLACEHOLDER: Series showing how smoothing creates/merges components]**
+
 ## The Recursion Tree
 
 For a knot with 3 crossings:
+
+**[IMAGE PLACEHOLDER: Full recursion tree diagram for 3-crossing knot]**
 ```
                 [3 crossings]
                /             \
@@ -79,14 +89,20 @@ For a knot with 3 crossings:
 - Result: `1` ✓
 - Calls: 1
 
+**[IMAGE PLACEHOLDER: Unknot diagram]**
+
 **1 Crossing:**
 - Result: `A + A^-1` ✓
 - Calls: 3
+
+**[IMAGE PLACEHOLDER: Single crossing recursion]**
 
 **Trefoil (3 crossings):**
 - Result: `A³ + 3A + 3A^-1 + A^-3`
 - Calls: 15
 - ⚠️ Wrong! (missing component tracking)
+
+**[IMAGE PLACEHOLDER: Trefoil showing where component tracking matters]**
 
 ### Why Trefoil is Wrong
 
@@ -96,6 +112,8 @@ Our simplified version gives: `A³ + 3A + 3A^-1 + A^-3`
 
 **The problem:** We're not accounting for when smoothing creates extra circles, which multiply the result by `(-A² - A^-2)`.
 
+**[IMAGE PLACEHOLDER: Side-by-side showing correct vs simplified smoothing]**
+
 ## What Needs to Be Fixed
 
 ### 1. Track Components
@@ -103,6 +121,8 @@ Our simplified version gives: `A³ + 3A + 3A^-1 + A^-3`
 When we smooth, we need to know:
 - Did we create an extra circle?
 - How many circles do we have now?
+
+**[IMAGE PLACEHOLDER: Flowchart showing component tracking decision tree]**
 
 ### 2. Proper Base Case
 ```cpp
@@ -137,6 +157,8 @@ struct DiagramState {
 **With memoization:**
 - Time: O(unique_states × polynomial_ops)
 - Space: O(unique_states)
+
+**[IMAGE PLACEHOLDER: Graph showing exponential growth vs memoization]**
 
 **Example for 10 crossings:**
 - Without memo: 1,024 states
