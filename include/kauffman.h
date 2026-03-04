@@ -34,38 +34,71 @@ private:
     }
 
 
-    //Base case (no crossings left)
+    // Base case (no crossings left)
     Polynomial base_case(int num_components) {
-        //n circles = (-A^2 - A^(-2))^(n-1)
-        return compute_delta_power(num_components -1);
-    }
+        Polynomial result = compute_delta_power(num_components - 1);
+        std::cout << "  → Base case (" << num_components << " components): ";
+        result.print();
+        std::cout << std::endl;
+        std::cout << "  → Returning: ";  // ADD THIS
+        result.print();                   // ADD THIS
+        std::cout << std::endl;           // ADD THIS
+        return result;
+}
 
     //main recursive computation
-    Polynomial compute(DiagramState state) {
+    Polynomial compute(DiagramState state, int total_crossings) {
         call_count++;
 
-        std::cout << "Computing " << state << std::endl; //debug output
+        std::cout << "Computing " << state << std::endl;
 
-        //Base case: no crossings left
-        if (state.num_crossings == 0) {
-            Polynomial result = base_case(state.num_components);
-            std::cout << " Base case: "; result.print(); std::cout << std::endl;
-            return result;
+        //BAse case: have all corssings been smoothed 
+        if (state.smoothing_history.size() == total_crossings) {
+            return base_case(state.num_components);
         }
 
-        //recursice case: smooth one crossing
-        //SIMPLIFIED: Assume A-smoothing adds a component, B-smoothing doesnt
-        DiagramState state_A(state.num_crossings -1, state.num_components + 1);
-        DiagramState state_B(state.num_crossings - 1, state.num_components);
+        //find next crossing to smooth 
+        int next_crossing = -1;
+        for (int i = 0; i < total_crossings; i++) {
+            if (state.smoothing_history.find(i) == state.smoothing_history.end()) {
+                next_crossing = i;
+                break;
+            }
+        }
 
-        Polynomial smooth_A = compute(state_A);
-        Polynomial smooth_B = compute(state_B);
+        //create state after a smoothing 
+        DiagramState state_A = state;
+        state_A.smoothing_history[next_crossing] = 'A';
 
-        // ⟨K⟩ = A × ⟨A-smooth⟩ + A^(-1) × ⟨B-smooth⟩
+        //update components {heuristics: even crossing = A adds components}
+        if (next_crossing % 2 == 0) {
+            state_A.num_components++;
+        }
+
+        //create state after B-smoothing
+        DiagramState state_B = state;
+        state_B.smoothing_history[next_crossing] = 'B';
+
+        if (next_crossing % 2 == 1) {
+            state_B.num_components++;
+        }
+
+        // Recursive calls
+        Polynomial smooth_A = compute(state_A, total_crossings);
+        Polynomial smooth_B = compute(state_B, total_crossings);
+
+        // Apply the formula: ⟨K⟩ = A × ⟨A-smooth⟩ + A^(-1) × ⟨B-smooth⟩
         Polynomial result_A = smooth_A.multiply_by_A(1);
         Polynomial result_B = smooth_B.multiply_by_A(-1);
 
-        return result_A + result_B;
+        Polynomial result = result_A + result_B;
+
+        // NEW DEBUG OUTPUT
+        std::cout << "  → Returning: ";
+        result.print();
+        std::cout << std::endl;
+    
+        return result;
     }
 
 public:
@@ -75,9 +108,9 @@ public:
         call_count = 0;
 
         //start with all crossings, 1 component
-        DiagramState initial_state(knot.size(), 1);
+        DiagramState initial_state(1);
 
-        Polynomial result = compute(initial_state);
+        Polynomial result = compute(initial_state, knot.size());
 
         std::cout << "\nTotal recursive calls: " << call_count << std::endl;
         return  result;

@@ -1,35 +1,38 @@
 #ifndef DIAGRAM_STATE_H
 #define DIAGRAM_STATE_H
 
-#include <functional>
+#include <map>
 #include <ostream>
 
 //represent the state of a knot diagram during computation
 struct DiagramState {
-    int num_crossings;
+    std::map<int, char> smoothing_history; // crossing id 'A' or 'B'
     int num_components;
 
-    DiagramState(int crossings, int components)
-        : num_crossings(crossings), num_components(components) {}
+    DiagramState(int components = 1) : num_components(components) {}
 
-    //for use as a map key
+    // Equility for caching 
     bool operator==(const DiagramState& other) const {
-        return num_crossings == other.num_crossings && 
+        return smoothing_history == other.smoothing_history &&
                num_components == other.num_components;
     }
 
-    bool operator<(const DiagramState& other) const {
-        if (num_crossings != other.num_crossings) {
-            return  num_crossings < other.num_crossings;
+    //Ordering for map key
+    bool operator<(const DiagramState&& other) const {
+        if (smoothing_history != other.smoothing_history) {
+            return smoothing_history < other.smoothing_history;
         }
         return num_components < other.num_components;
     }
 };
 
-//debugging
+// For debugging - show the state
 inline std::ostream& operator<<(std::ostream& os, const DiagramState& state) {
-    os << "[" << state.num_crossings << " crossings, "
-       << state.num_components << " components]";
+    os << "[history: ";
+    for (const auto& [crossing, type] : state.smoothing_history) {
+        os << crossing << "→" << type << " ";
+    }
+    os << "| " << state.num_components << " components]";
     return os;
 }
 
