@@ -5,7 +5,10 @@
 #include "knot.h"
 #include "polynomial.h"
 #include <iostream>
+#include <numeric>
 #include <ostream>
+#include <set>
+#include <vector>
 
 class KauffmanBracket {
 private:
@@ -13,6 +16,54 @@ private:
     int cache_hits;
     std::map<DiagramState, Polynomial> cache;
     bool debug;
+
+    // Union-Find: find root with path compression
+    int uf_find(std::vector<int>& parent, int x) {
+        if (parent[x] != x)
+            parent[x] = uf_find(parent, parent[x]);
+        return parent[x];
+    }
+
+    void uf_unite(std::vector<int>& parent, int a, int b) {
+        a = uf_find(parent, a);
+        b = uf_find(parent, b);
+        if (a != b) parent[a] = b;
+    }
+
+    // Count circles produced by a complete smoothing assignment.
+    // There are 2n gaps (gap i sits between position i-1 and position i).
+    // A-smooth at crossing (p,q): merges gap(p-1) with gap(q), and gap(q-1) with gap(p)
+    // B-smooth at crossing (p,q): merges gap(p-1) with gap(p), and gap(q-1) with gap(q)
+    int count_components(
+        const std::vector<std::pair<int,int>>& positions,
+        const std::map<int, char>& smoothing,
+        int n)
+    {
+        if (n == 0) return 1;  // bare unknot = 1 circle
+
+        int gaps = 2 * n;
+        std::vector<int> parent(gaps);
+        std::iota(parent.begin(), parent.end(), 0);
+
+        for (int c = 0; c < n; c++) {
+            auto [p, q] = positions[c];
+            int before_p = (p - 1 + gaps) % gaps;
+            int before_q = (q - 1 + gaps) % gaps;
+
+            if (smoothing.at(c) == 'A') {
+                uf_unite(parent, before_p, q);
+                uf_unite(parent, before_q, p);
+            } else {
+                uf_unite(parent, before_p, p);
+                uf_unite(parent, before_q, q);
+            }
+        }
+
+        std::set<int> roots;
+        for (int i = 0; i < gaps; i++)
+            roots.insert(uf_find(parent, i));
+        return roots.size();
+    }
     
     //compute (-A^2 - A^(-2))^n
     Polynomial compute_delta_power(int n) {
@@ -37,42 +88,37 @@ private:
     }
 
 
-    // Base case (no crossings left)
-    Polynomial base_case(int num_components) {
-        Polynomial result = compute_delta_power(num_components - 1);
-        // std::cout << "  → Base case (" << num_components << " components): ";
-        // result.print();
-        // std::cout << std::endl;
-        // std::cout << "  → Returning: ";  
-        // result.print();                   
-        // std::cout << std::endl;           
-        return result;
-}
+    // Base case (no crossings left): compute real circle count then apply delta formula
+    Polynomial base_case(
+        const std::vector<std::pair<int,int>>& positions,
+        const std::map<int, char>& smoothing,
+        int n)
+    {
+        int components = count_components(positions, smoothing, n);
+        return compute_delta_power(components - 1);
+    }
 
     //main recursive computation
-    Polynomial compute(DiagramState state, int total_crossings) {
+    Polynomial compute(
+        DiagramState state,
+        int total_crossings,
+        const std::vector<std::pair<int,int>>& positions)
+    {
         call_count++;
 
-        //check cache 
+        //check cache
         auto it = cache.find(state);
         if (it != cache.end()) {
             cache_hits++;
-            if (debug) {
-                // std::cout << " [CACHE HIT] " << state << std::endl;
-            }
-            return it->second; //return cached result
+            return it->second;
         }
 
-        if (debug) {
-            // std::cout << "Computing " << state << std::endl;
+        //base case: all crossings smoothed — count real components
+        if ((int)state.smoothing_history.size() == total_crossings) {
+            return base_case(positions, state.smoothing_history, total_crossings);
         }
 
-        //BAse case: have all corssings been smoothed 
-        if (state.smoothing_history.size() == total_crossings) {
-            return base_case(state.num_components);
-        }
-
-        //find next crossing to smooth 
+        //find next unsmoothed crossing
         int next_crossing = -1;
         for (int i = 0; i < total_crossings; i++) {
             if (state.smoothing_history.find(i) == state.smoothing_history.end()) {
@@ -81,41 +127,20 @@ private:
             }
         }
 
-        //create state after a smoothing 
         DiagramState state_A = state;
         state_A.smoothing_history[next_crossing] = 'A';
 
-        //update components {heuristics: even crossing = A adds components}
-        if (next_crossing % 2 == 0) {
-            state_A.num_components++;
-        }
-
-        //create state after B-smoothing
         DiagramState state_B = state;
         state_B.smoothing_history[next_crossing] = 'B';
 
-        if (next_crossing % 2 == 1) {
-            state_B.num_components++;
-        }
-
         // Recursive calls
-        Polynomial smooth_A = compute(state_A, total_crossings);
-        Polynomial smooth_B = compute(state_B, total_crossings);
+        Polynomial smooth_A = compute(state_A, total_crossings, positions);
+        Polynomial smooth_B = compute(state_B, total_crossings, positions);
 
-        // Apply the formula: ⟨K⟩ = A × ⟨A-smooth⟩ + A^(-1) × ⟨B-smooth⟩
-        Polynomial result_A = smooth_A.multiply_by_A(1);
-        Polynomial result_B = smooth_B.multiply_by_A(-1);
+        // ⟨K⟩ = A × ⟨A-smooth⟩ + A^(-1) × ⟨B-smooth⟩
+        Polynomial result = smooth_A.multiply_by_A(1) + smooth_B.multiply_by_A(-1);
 
-        Polynomial result = result_A + result_B;
-
-        //store in cache 
         cache[state] = result;
-
-        // NEW DEBUG OUTPUT
-        //std::cout << "  → Returning: ";
-        //result.print();
-        //std::cout << std::endl;
-    
         return result;
     }
 
@@ -125,11 +150,12 @@ public:
     
     Polynomial bracket(const KnotDiagram& knot) {
         call_count = 0;
-        cache_hits = 0;  // RESET
+        cache_hits = 0;
         cache.clear();
-        
-        DiagramState initial_state(1);
-        Polynomial result = compute(initial_state, knot.size());
+
+        DiagramState initial_state;
+        const auto& positions = knot.get_crossing_positions();
+        Polynomial result = compute(initial_state, knot.size(), positions);
         
         std::cout << "\\nPerformance Metrics:" << std::endl;
         std::cout << "  Total calls: " << call_count << std::endl;

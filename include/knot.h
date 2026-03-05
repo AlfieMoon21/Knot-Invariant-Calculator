@@ -3,12 +3,14 @@
 
 #include <vector>
 #include <iostream>
+#include <cstdlib>
 #include "crossing.h"
 
 class KnotDiagram {
 private:
     std::vector<Crossing> crossings;
     int num_components; // number of separate loops
+    std::vector<std::pair<int,int>> crossing_positions; // (first_visit, second_visit) in 0-indexed arc positions
 
 public:
     KnotDiagram() : num_components(1) {}
@@ -33,6 +35,11 @@ public:
         return crossings;
     }
 
+    // Get arc position pairs for component counting
+    const std::vector<std::pair<int,int>>& get_crossing_positions() const {
+        return crossing_positions;
+    }
+
     void print() const {
         std::cout << "Knot with " << crossings.size() << " crossings:\n";
         for (const auto& c : crossings) {
@@ -48,12 +55,18 @@ public:
         // Each position in DT notation represents a crossing
         for (size_t i = 0; i < dt_notation.size(); i++) {
             int value = dt_notation[i];
-        
+
             // Sign of the crossing: positive if value > 0, negative if value < 0
             int sign = (value > 0) ? 1 : -1;
-        
+
             // Add the crossing (index i, with determined sign)
             knot.add_crossing(i, sign);
+
+            // Store arc positions: crossing i is visited at position 2i (first)
+            // and abs(value)-1 (second), both 0-indexed in the range [0, 2n)
+            int first_visit = 2 * i;
+            int second_visit = std::abs(value) - 1;
+            knot.crossing_positions.push_back({first_visit, second_visit});
         }
     
         return knot;
