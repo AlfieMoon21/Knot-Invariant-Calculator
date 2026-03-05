@@ -18,7 +18,7 @@ struct DiagramState {
     }
 
     //Ordering for map key
-    bool operator<(const DiagramState&& other) const {
+    bool operator<(const DiagramState& other) const {
         if (smoothing_history != other.smoothing_history) {
             return smoothing_history < other.smoothing_history;
         }

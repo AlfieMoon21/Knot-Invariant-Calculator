@@ -10,6 +10,9 @@
 class KauffmanBracket {
 private:
     int call_count;  // Track how many times we recurse
+    int cache_hits;
+    std::map<DiagramState, Polynomial> cache;
+    bool debug;
     
     //compute (-A^2 - A^(-2))^n
     Polynomial compute_delta_power(int n) {
@@ -37,12 +40,12 @@ private:
     // Base case (no crossings left)
     Polynomial base_case(int num_components) {
         Polynomial result = compute_delta_power(num_components - 1);
-        std::cout << "  → Base case (" << num_components << " components): ";
-        result.print();
-        std::cout << std::endl;
-        std::cout << "  → Returning: ";  // ADD THIS
-        result.print();                   // ADD THIS
-        std::cout << std::endl;           // ADD THIS
+        // std::cout << "  → Base case (" << num_components << " components): ";
+        // result.print();
+        // std::cout << std::endl;
+        // std::cout << "  → Returning: ";  
+        // result.print();                   
+        // std::cout << std::endl;           
         return result;
 }
 
@@ -50,7 +53,19 @@ private:
     Polynomial compute(DiagramState state, int total_crossings) {
         call_count++;
 
-        std::cout << "Computing " << state << std::endl;
+        //check cache 
+        auto it = cache.find(state);
+        if (it != cache.end()) {
+            cache_hits++;
+            if (debug) {
+                // std::cout << " [CACHE HIT] " << state << std::endl;
+            }
+            return it->second; //return cached result
+        }
+
+        if (debug) {
+            // std::cout << "Computing " << state << std::endl;
+        }
 
         //BAse case: have all corssings been smoothed 
         if (state.smoothing_history.size() == total_crossings) {
@@ -93,27 +108,38 @@ private:
 
         Polynomial result = result_A + result_B;
 
+        //store in cache 
+        cache[state] = result;
+
         // NEW DEBUG OUTPUT
-        std::cout << "  → Returning: ";
-        result.print();
-        std::cout << std::endl;
+        //std::cout << "  → Returning: ";
+        //result.print();
+        //std::cout << std::endl;
     
         return result;
     }
 
 public:
-    KauffmanBracket() : call_count(0) {}
-
+    KauffmanBracket(bool enable_debug = false)
+         : call_count(0), cache_hits(0) {}  // INITIALIZE
+    
     Polynomial bracket(const KnotDiagram& knot) {
         call_count = 0;
-
-        //start with all crossings, 1 component
+        cache_hits = 0;  // RESET
+        cache.clear();
+        
         DiagramState initial_state(1);
-
         Polynomial result = compute(initial_state, knot.size());
-
-        std::cout << "\nTotal recursive calls: " << call_count << std::endl;
-        return  result;
+        
+        std::cout << "\\nPerformance Metrics:" << std::endl;
+        std::cout << "  Total calls: " << call_count << std::endl;
+        std::cout << "  Cache hits: " << cache_hits << std::endl;
+        std::cout << "  Cache hit rate: " 
+                  << (call_count > 0 ? (100.0 * cache_hits / call_count) : 0) 
+                  << "%" << std::endl;
+        std::cout << "  Unique states: " << cache.size() << std::endl;
+        
+        return result;
     }
 };
 
