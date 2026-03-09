@@ -12,10 +12,10 @@
 
 class KauffmanBracket {
 private:
-    int call_count;  // Track how many times we recurse
+    int call_count;
     int cache_hits;
     std::map<DiagramState, Polynomial> cache;
-    bool debug;
+    bool use_cache; 
 
     // Union-Find: find root with path compression
     int uf_find(std::vector<int>& parent, int x) {
@@ -30,16 +30,13 @@ private:
         if (a != b) parent[a] = b;
     }
 
-    // Count circles produced by a complete smoothing assignment.
-    // There are 2n gaps (gap i sits between position i-1 and position i).
-    // A-smooth at crossing (p,q): merges gap(p-1) with gap(q), and gap(q-1) with gap(p)
-    // B-smooth at crossing (p,q): merges gap(p-1) with gap(p), and gap(q-1) with gap(q)
+    // Count circles produced by a complete smoothing assignment
     int count_components(
         const std::vector<std::pair<int,int>>& positions,
         const std::map<int, char>& smoothing,
         int n)
     {
-        if (n == 0) return 1;  // bare unknot = 1 circle
+        if (n == 0) return 1;
 
         int gaps = 2 * n;
         std::vector<int> parent(gaps);
@@ -65,20 +62,18 @@ private:
         return roots.size();
     }
     
-    //compute (-A^2 - A^(-2))^n
+    // Compute (-A^2 - A^(-2))^n
     Polynomial compute_delta_power(int n) {
         if (n == 0) {
             Polynomial result;
-            result.add_term(0, 1); // return 1
-            return  result;
+            result.add_term(0, 1);
+            return result;
         }
 
-        //create delta = (-A^2 - A^(-2))
         Polynomial delta;
-        delta.add_term(2, -1); //-A^2
-        delta.add_term(-2, -1); // -A^(-2)
+        delta.add_term(2, -1);
+        delta.add_term(-2, -1);
 
-        //compute delta^n by repeated multiplication
         Polynomial result = delta;
         for (int i = 1; i < n; i++) {
             result = result * delta;
@@ -87,8 +82,7 @@ private:
         return result;
     }
 
-
-    // Base case (no crossings left): compute real circle count then apply delta formula
+    // Base case: compute real circle count then apply delta formula
     Polynomial base_case(
         const std::vector<std::pair<int,int>>& positions,
         const std::map<int, char>& smoothing,
@@ -98,7 +92,7 @@ private:
         return compute_delta_power(components - 1);
     }
 
-    //main recursive computation
+    // Main recursive computation
     Polynomial compute(
         DiagramState state,
         int total_crossings,
@@ -106,19 +100,21 @@ private:
     {
         call_count++;
 
-        //check cache
-        auto it = cache.find(state);
-        if (it != cache.end()) {
-            cache_hits++;
-            return it->second;
+        // CHECK CACHE ONLY IF ENABLED
+        if (use_cache) {
+            auto it = cache.find(state);
+            if (it != cache.end()) {
+                cache_hits++;
+                return it->second;
+            }
         }
 
-        //base case: all crossings smoothed — count real components
+        // Base case: all crossings smoothed
         if ((int)state.smoothing_history.size() == total_crossings) {
             return base_case(positions, state.smoothing_history, total_crossings);
         }
 
-        //find next unsmoothed crossing
+        // Find next unsmoothed crossing
         int next_crossing = -1;
         for (int i = 0; i < total_crossings; i++) {
             if (state.smoothing_history.find(i) == state.smoothing_history.end()) {
@@ -140,13 +136,21 @@ private:
         // ⟨K⟩ = A × ⟨A-smooth⟩ + A^(-1) × ⟨B-smooth⟩
         Polynomial result = smooth_A.multiply_by_A(1) + smooth_B.multiply_by_A(-1);
 
-        cache[state] = result;
+        // STORE IN CACHE ONLY IF ENABLED
+        if (use_cache) {
+            cache[state] = result;
+        }
+        
         return result;
     }
 
 public:
-    KauffmanBracket(bool enable_debug = false)
-         : call_count(0), cache_hits(0) {}  // INITIALIZE
+    KauffmanBracket() : call_count(0), cache_hits(0), use_cache(true) {}
+    
+    // Enable or disable caching
+    void enable_cache(bool enable) {
+        use_cache = enable;
+    }
     
     Polynomial bracket(const KnotDiagram& knot) {
         call_count = 0;
@@ -157,13 +161,14 @@ public:
         const auto& positions = knot.get_crossing_positions();
         Polynomial result = compute(initial_state, knot.size(), positions);
         
-        std::cout << "\\nPerformance Metrics:" << std::endl;
+        std::cout << "\nPerformance Metrics:" << std::endl;
         std::cout << "  Total calls: " << call_count << std::endl;
         std::cout << "  Cache hits: " << cache_hits << std::endl;
         std::cout << "  Cache hit rate: " 
                   << (call_count > 0 ? (100.0 * cache_hits / call_count) : 0) 
                   << "%" << std::endl;
         std::cout << "  Unique states: " << cache.size() << std::endl;
+        std::cout << "  Cache: " << (use_cache ? "ENABLED" : "DISABLED") << std::endl;
         
         return result;
     }

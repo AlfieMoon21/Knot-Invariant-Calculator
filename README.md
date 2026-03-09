@@ -9,20 +9,6 @@ make
 ./knot_calc
 ```
 
-(Full functionality coming soon - currently in development)
-
-## Current Status
-
-**Week 2:**
--  Polynomial arithmetic implemented and tested
--  Knot representation in progress
--  Kauffman bracket algorithm (next)
--  Optimization and profiling (later)
-
-See [DEVELOPMENT.md](DEVELOPMENT.md) and [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md) for details.
-
----
-
 ## Problem Statement
 
 Compute the Jones polynomial for mathematical knots. The Jones polynomial is a knot invariant that assigns a Laurent polynomial to a knot in a way that is independent of the particular diagram used to represent it. Computing the Jones polynomial is computationally intensive due to the exponential growth in the number of states that must be evaluated as the number of crossings increases.
