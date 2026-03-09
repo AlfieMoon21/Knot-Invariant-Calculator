@@ -40,6 +40,20 @@ public:
         return crossing_positions;
     }
 
+    // Get writhe (sum of crossing signs)
+    int get_writhe() const {
+        int w = 0;
+        for (const auto& c : crossings) w += c.sign;
+        return w;
+    }
+
+    // Get crossing signs as a plain vector (for passing to Kauffman bracket)
+    std::vector<int> get_crossing_signs() const {
+        std::vector<int> signs;
+        for (const auto& c : crossings) signs.push_back(c.sign);
+        return signs;
+    }
+
     void print() const {
         std::cout << "Knot with " << crossings.size() << " crossings:\n";
         for (const auto& c : crossings) {
