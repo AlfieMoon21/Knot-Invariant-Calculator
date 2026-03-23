@@ -9,7 +9,7 @@
 // every history unique.
 //
 // Replaced by CacheKey in kauffman.h, which keys on the resulting arc connectivity
-// rather than the sequence of choices that produced it — so two different histories
+// rather than the sequence of choices that produced it, so two different histories
 // that yield the same topology share a cache entry.
 //
 // Kept to illustrate exactly why the naive approach fails.
@@ -17,7 +17,7 @@
 #include <map>
 #include <ostream>
 
-// Original history-based cache key (superseded — see kauffman.h CacheKey).
+// Original history-based cache key (superseded, see kauffman.h CacheKey).
 struct DiagramState {
     std::map<int, char> smoothing_history; // crossing id 'A' or 'B'
     int num_components;

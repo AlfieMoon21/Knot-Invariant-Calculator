@@ -6,13 +6,13 @@
  *
  * The naive approach keys on the history of A/B choices (e.g. {0:A, 1:B, ...}).
  * Since crossings are always smoothed in the same order, every path through the
- * recursion tree is unique — the cache never hits.
+ * recursion tree is unique, so the cache never hits.
  *
  * The fix is to key on what the smoothings produced, not how they got there.
  * After partially smoothing a diagram, all that matters for the remaining computation
  * is: (1) which crossings are still unprocessed, and (2) how the arc endpoints are
  * currently connected. Two different sequences of A/B choices that yield the same
- * arc connectivity with the same crossings left will produce identical results —
+ * arc connectivity with the same crossings left will produce identical results,
  * so we cache on that pair and skip the duplicate subtree entirely.
  *
  * Connectivity is stored as a canonical vector: scan arc endpoints 0..2n-1 and
@@ -40,7 +40,7 @@ struct CacheKey {
     std::vector<int> connectivity; // canonical component IDs for each arc endpoint
     int remaining;                 // bitmask: bit i set = crossing i not yet smoothed
 
-    // OPTIMISATION: compare `remaining` first — it's an O(1) int check that
+    // OPTIMISATION: compare `remaining` first; it's an O(1) int check that
     // filters out most mismatches before the O(n) vector comparison.
     bool operator<(const CacheKey& other) const {
         if (remaining != other.remaining) return remaining < other.remaining;
@@ -80,9 +80,9 @@ private:
     // position p enters from before_p = p-1, and similarly for q.
     //
     // A-smoothing on a positive crossing joins:  (before_p, q) and (before_q, p)
-    //   — the two strands cross over each other.
+    //   (the two strands cross over each other).
     // B-smoothing on a positive crossing joins:  (before_p, before_q) and (p, q)
-    //   — the two strands run parallel.
+    //   (the two strands run parallel).
     // For a negative crossing the roles of A and B are swapped.
     void apply_smoothing(std::vector<int>& uf, const std::pair<int,int>& pos,
                          int sign, char type, int n) {
@@ -91,7 +91,7 @@ private:
         int before_p = (p - 1 + gaps) % gaps;
         int before_q = (q - 1 + gaps) % gaps;
 
-        // cross_connect = true  →  A-smoothing on positive (or B on negative)
+        // cross_connect = true means A-smoothing on positive (or B on negative)
         bool cross_connect = (type == 'A') == (sign > 0);
 
         if (cross_connect) {
@@ -138,9 +138,9 @@ private:
     }
 
     // Recursive Kauffman bracket.
-    //   uf        — arc connectivity built up incrementally as crossings are smoothed
-    //   remaining — bitmask of crossings not yet smoothed
-    //   n         — total number of crossings
+    //   uf        : arc connectivity built up incrementally as crossings are smoothed
+    //   remaining : bitmask of crossings not yet smoothed
+    //   n         : total number of crossings
     Polynomial compute(
         std::vector<int> uf,
         int remaining,
@@ -175,7 +175,7 @@ private:
         while (!(remaining & (1 << c))) c++;
         int next_remaining = remaining & ~(1 << c);
 
-        // OPTIMISATION: incremental union-find — copy current state and apply one
+        // OPTIMISATION: incremental union-find. Copy current state and apply one
         // smoothing step, rather than rebuilding from scratch. O(2n) copy but avoids
         // reprocessing all previously smoothed crossings.
 
@@ -191,7 +191,7 @@ private:
 
         // Kauffman skein relation: <K> = A*<A-smooth> + A^{-1}*<B-smooth>
         // OPTIMISATION: multiply_by_A shifts exponents in O(|terms|) rather than
-        // full polynomial multiplication O(|terms|²) — valid because we're multiplying
+        // full polynomial multiplication O(|terms|²), valid because we're multiplying
         // by a monomial.
         Polynomial result = smooth_A.multiply_by_A(1) + smooth_B.multiply_by_A(-1);
 
@@ -232,7 +232,7 @@ public:
         std::vector<int> uf(2 * n);
         std::iota(uf.begin(), uf.end(), 0);
 
-        // OPTIMISATION: (1 << n) - 1 sets all n bits in one operation — all crossings unsmoothed.
+        // OPTIMISATION: (1 << n) - 1 sets all n bits in one operation (all crossings unsmoothed).
         int all_remaining = (1 << n) - 1;
 
         const auto& positions = knot.get_crossing_positions();

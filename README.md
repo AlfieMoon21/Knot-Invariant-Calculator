@@ -1,96 +1,61 @@
-# Project Proposal: Knot Invariant Calculator
+# Knot Invariant Calculator
+
+Computes the Jones polynomial of mathematical knots from Dowker–Thistlethwaite (DT) notation using the Kauffman bracket algorithm.
 
 ## Quick Start
-```bash
-# Compile
-make
 
-# Run tests
+```bash
+make
 ./knot_calc
 ```
 
-## Problem Statement
+## What It Does
 
-Compute the Jones polynomial for mathematical knots. The Jones polynomial is a knot invariant that assigns a Laurent polynomial to a knot in a way that is independent of the particular diagram used to represent it. Computing the Jones polynomial is computationally intensive due to the exponential growth in the number of states that must be evaluated as the number of crossings increases.
+Takes a knot diagram encoded as DT notation and computes two polynomials:
 
-## Motivation and Context
+- **Kauffman bracket** `<K>`: a state-sum over all 2ⁿ smoothings of the crossings
+- **Jones polynomial** `V_K(A)`: the writhe-normalised bracket, a true knot invariant
 
-Knots can be represented in multiple ways depending on purpose. Diagrammatic encodings such as Dowker–Thistlethwaite (DT) notation or Gauss codes provide a compact, computable description of a specific knot diagram, while knot invariants such as the Jones polynomial provide an abstract, diagram-independent characterization of the knot itself.
+The benchmark runs a series of torus knots T(2,n) with and without the memoization cache, printing call counts, cache hit rates, and wall-clock times.
 
-This project focuses on bridging these two perspectives: transforming a concrete, diagram-dependent encoding (DT notation) into a diagram-independent invariant (the Jones polynomial). This transformation is fundamental in computational knot theory and reflects the broader challenge of extracting invariant information from combinatorial data.
+Example output for the trefoil T(2,3):
+```
+Bracket <K>: -A^5 - A^-3 + A^-7
+Writhe: 3
+Jones  V(A): A^-4 + A^-12 - A^-16
+```
 
-The Jones polynomial is particularly well-suited for this task as it is powerful enough to distinguish many non-equivalent knots, yet complex enough to pose significant computational and algorithmic challenges.
+## File Structure
 
-## Why This Problem?
+| Path | Purpose |
+|------|---------|
+| `src/main.cpp` | Benchmark entry point |
+| `include/knot.h` | `KnotDiagram`: parses DT notation, stores crossings and arc positions |
+| `include/kauffman.h` | `KauffmanBracket`: recursive bracket, memoization cache, Jones normalization |
+| `include/polynomial.h` | `Polynomial`: sparse Laurent polynomial arithmetic |
+| `include/crossing.h` | `Crossing` struct: index and sign |
+| `include/union_find.h` | Standalone `UnionFind` class (not used by kauffman.h, kept for reference) |
+| `include/diagram_state.h` | `DiagramState`: the old history-based cache key (replaced, kept for reference) |
+| `data/test_knots.txt` | Input data placeholder |
+| `poster/poster.tex` | Conference poster (LaTeX, beamerposter + gemini theme) |
 
-* Translates between diagram-level representations and topological invariants
-* Computationally complex (exponential time complexity)
-* Large state space even for modest knots (10+ crossings)
-* Significant memory management challenges
-* Directly relevant to my dissertation work in knot theory
-* Rich opportunities for algorithmic and data-structure optimization
+## Build
 
-## Representation vs Invariant
+```bash
+make          # build
+make run      # build and run
+make clean    # remove binary
+```
 
-**DT notation / Gauss codes:**
-* Encode a specific knot diagram
-* Diagram-dependent and non-unique
-* Suitable as algorithmic input
-* Preserve full combinatorial structure of the knot diagram
-
-**Jones polynomial:**
-* A knot invariant
-* Independent of diagram choice
-* Cannot reconstruct the original knot
-* Used for classification and comparison of knots
-
-This project computes a knot invariant from a non-invariant representation, ensuring that different diagrammatic inputs corresponding to the same knot produce identical output polynomials (up to normalization).
-
-## Key Characteristics
-
-* **Input:** Knot diagrams (Dowker–Thistlethwaite notation or Gauss codes)
-* **Output:** Jones polynomial V_K(t)
-* **Algorithm:** Kauffman bracket expansion with skein relations
-* **Complexity:** O(2^n) for n crossings without optimization
-* **Data Source:** KnotInfo database (knots up to 12+ crossings)
-
-## Data Structures
-
-* Knot diagram representation (crossings, strands, adjacency)
-* Sparse polynomial representation (`map<int, int>` for power → coefficient)
-* State cache for memoization
-* Efficient diagram encoding for hashing and equality checks
-
-## Optimization Targets
-
-* Memoization to eliminate redundant state evaluations
-* Efficient sparse polynomial arithmetic
-* Cache-friendly memory layouts
-* State-space pruning where possible
-
-## Development Plan
-
-1. Basic implementation in C++ on university machines
-2. Profiling using `valgrind`, `gprof`, and `perf`
-3. Algorithmic and data-structure optimization
-4. Optional port to Raspberry Pi B v1.2
-5. Comparative performance analysis
-
-## Expected Challenges
-
-* Managing exponential state explosion
-* Memory constraints on target hardware
-* Ensuring correctness of polynomial arithmetic
-* Validating output against known knot invariants
+Requires `g++` with C++17 support (`-std=c++17 -O2`).
 
 ## Documentation
 
-* [How It Works](docs/HOW_IT_WORKS.md) - High-level overview
-* [Polynomials](docs/polynomials.md) - Laurent polynomial implementation
-* [Development Log](DEVELOPMENT.md) - Week-by-week progress
+- [`docs/ALGORITHM.md`](docs/ALGORITHM.md): mathematical background, the Kauffman bracket, arc endpoint model, Jones normalisation, and the memoization cache
+- [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md): implementation details, optimization strategies, full code walkthrough, and development log
 
 ## References
 
-* Kauffman, L. H. (1987). State models and the Jones polynomial. *Topology*, 26(3), 395-407.
-* Jones, V. F. R. (1985). A polynomial invariant for knots via von Neumann algebras. *Bulletin of the AMS*, 12(1), 103-111.
-* KnotInfo: https://knotinfo.math.indiana.edu/
+- Kauffman, L. H. (1987). State models and the Jones polynomial. *Topology*, 26(3), 395–407.
+- Jones, V. F. R. (1985). A polynomial invariant for knots via von Neumann algebras. *Bull. Amer. Math. Soc.*, 12(1), 103–111.
+- KnotInfo database: https://knotinfo.math.indiana.edu

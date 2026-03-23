@@ -7,7 +7,7 @@
 // Sparse Laurent polynomial in A with integer coefficients.
 // Stored as a map of power → coefficient; zero-coefficient terms are erased.
 //
-// OPTIMISATION: sparse storage matters here — Kauffman bracket polynomials have
+// OPTIMISATION: sparse storage matters here. Kauffman bracket polynomials have
 // O(n) non-zero terms despite spanning a power range of O(n), so a dense array
 // would waste time and space on zero entries.
 class Polynomial {
@@ -34,7 +34,7 @@ public:
     }
 
     // Full convolution: O(|this| * |other|).
-    // Only used in compute_delta_power (small polynomials) — not on the hot path.
+    // Only used in compute_delta_power (small polynomials), not on the hot path.
     Polynomial operator*(const Polynomial& other) const {
         Polynomial result;
         for (auto& [p1, c1] : terms) {
@@ -47,7 +47,7 @@ public:
     
     // OPTIMISATION: shift all exponents by `power` in O(|terms|), used by the
     // skein relation (<K> = A*<A-smooth> + A^{-1}*<B-smooth>). Both multiplications
-    // are by a monomial, so a pure exponent shift is enough — operator* would be
+    // are by a monomial, so a pure exponent shift is enough; operator* would be
     // O(|terms|²) for no gain.
     Polynomial multiply_by_A(int power) const {
         Polynomial result;
