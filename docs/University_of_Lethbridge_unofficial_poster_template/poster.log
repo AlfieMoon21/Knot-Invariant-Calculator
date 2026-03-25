@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.24.0 (TeX Live 2026/Arch Linux)  (format=lualatex 2026.3.25)  25 MAR 2026 14:19
+This is LuaHBTeX, Version 1.24.0 (TeX Live 2026/Arch Linux)  (format=lualatex 2026.3.25)  25 MAR 2026 14:48
  restricted system commands enabled.
  file:line:error style messages enabled.
 **/home/moon/Uni/Knot-Invariant-Calculator/docs/University_of_Lethbridge_unofficial_poster_template/poster
@@ -157,8 +157,7 @@ Package: pgfrcs 2025-08-29 v3.1.11a (3.1.11a)
 \c@pgfmathroundto@lastzeros=\count307
 ))) (/usr/share/texmf-dist/tex/latex/base/size11.clo
 File: size11.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
-luaotfload | db : Font names database not found, generating new one.
-luaotfload | db : This can take several minutes; please be patient.) (/usr/share/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty (/usr/share/texmf-dist/tex/latex/graphics/graphicx.sty
+luaotfload | db : Font names database loaded from /home/moon/.texlive/texmf-var/luatex-cache/generic/names/luaotfload-names.luc.gz) (/usr/share/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty (/usr/share/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 2024/12/31 v1.2e Enhanced LaTeX Graphics (DPC,SPQR)
  (/usr/share/texmf-dist/tex/latex/graphics/graphics.sty
 Package: graphics 2024/08/06 v1.4g Standard LaTeX Graphics (DPC,SPQR)
@@ -1310,6 +1309,7 @@ LaTeX Info: Redefining \addtolength on input line 87.
 \calc@Ccount=\count385
 \calc@Cskip=\skip83
 )
+luaotfload | cache : Lookup cache loaded from /home/moon/.texlive/texmf-var/luatex-cache/generic/names/luaotfload-lookup-cache.luc.
 LaTeX Font Info:    Font shape `TU/OpenSans(0)/m/n' will be
 (Font)              scaled to size 23.64pt on input line 19.
 
@@ -1533,10 +1533,9 @@ File: lstmisc.sty 2025/11/14 1.11b (Carsten Heinz)
 )
 \sepwidth=\skip87
 \colwidth=\skip88
-
-No file poster.aux.
-
+ (./poster.aux)
 \openout1 = poster.aux
+
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 72.
 LaTeX Font Info:    ... okay on input line 72.
 LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 72.
@@ -1557,6 +1556,7 @@ LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 72.
 LaTeX Font Info:    ... okay on input line 72.
 LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 72.
 LaTeX Font Info:    ... okay on input line 72.
+
 *geometry* driver: auto-detecting
 *geometry* detected driver: luatex
 *geometry* verbose mode - [ preamble ] result:
@@ -1611,6 +1611,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
 Package hyperref Info: Link coloring OFF on input line 72.
+ (./poster.out) (./poster.out)
 \@outlinefile=\write5
 
 \openout5 = poster.out
@@ -1698,7 +1699,7 @@ LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
 Package pgfplots notification 'compat/show suggested version=true': you might benefit from \pgfplotsset{compat=1.18} (current compat level: 1.14).
 
 \c@lstlisting=\count422
-No file poster.nav.
+(./poster.nav)
 LaTeX Font Info:    Calculating math sizes for size <11.4> on input line 72.
 LaTeX Font Info:    External font `cmex7' loaded for size
 (Font)              <7.97995> on input line 72.
@@ -1706,9 +1707,13 @@ LaTeX Font Info:    External font `cmex7' loaded for size
 (Font)              <5.7> on input line 72.
 
 \openout4 = poster.vrb
-(./poster.vrb
+ (./poster.vrb
 LaTeX Font Info:    Calculating math sizes for size <23.64> on input line 11.
-) [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
+)
+Overfull \vbox (64.13774pt too high) detected at line 376
+ []
+
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 ]
 \tf@nav=\write6
@@ -1725,28 +1730,21 @@ LaTeX Font Info:    Calculating math sizes for size <23.64> on input line 11.
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
-
-
-Package rerunfilecheck Warning: File `poster.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `poster.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  D41D8CD98F00B204E9800998ECF8427E;0.
+Package rerunfilecheck Info: File `poster.out' has not changed.
+(rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
 )
 
 Here is how much of LuaTeX's memory you used:
- 42052 strings out of 476076
- 1164439,1977958 words of node,token memory allocated
- 292680 words of node memory still in use:
-   8464 hlist, 54 vlist, 4469 rule, 930 disc, 167 local_par, 94 math, 7343 glue, 8447 kern, 290 penalty, 7211 glyph, 3819 attribute, 82 glue_spec, 3819 attribute_list, 4 write, 184 pdf_literal, 652 pdf_colorstack nodes
-   avail lists: 1:2,2:416,3:1456,4:2127,5:25457,6:512,7:44651,8:25,9:39128,10:28,11:2814
- 63263 multiletter control sequences out of 65536+600000
+ 42082 strings out of 476076
+ 1164441,1977958 words of node,token memory allocated
+ 299419 words of node memory still in use:
+   8497 hlist, 55 vlist, 4477 rule, 963 disc, 171 local_par, 100 math, 7527 glue, 8535 kern, 300 penalty, 7753 glyph, 3910 attribute, 82 glue_spec, 3910 attribute_list, 4 write, 184 pdf_literal, 656 pdf_colorstack nodes
+   avail lists: 1:2,2:418,3:1486,4:2139,5:25721,6:524,7:46847,8:25,9:39254,10:28,11:2913
+ 63273 multiletter control sequences out of 65536+600000
  121 fonts using 22369287 bytes
  128i,18n,116p,820b,1810s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-LightItalic.ttf></usr/share/texmf-dist/fonts/opentype/public/lm/lmroman17-regular.otf></usr/share/texmf-dist/fonts/opentype/public/lm/lmmono12-regular.otf></usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-Bold.ttf></usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-Regular.ttf></usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-Light.ttf></usr/share/texmf-dist/fonts/opentype/impallari/raleway/Raleway-Regular.otf></usr/share/texmf-dist/fonts/opentype/impallari/raleway/Raleway-Bold.otf></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on poster.pdf (1 page, 147760 bytes).
+Output written on poster.pdf (1 page, 149686 bytes).
 
 PDF statistics: 108 PDF objects out of 1000 (max. 8388607)
  63 compressed objects within 1 object stream

@@ -240,11 +240,32 @@ void apply_smoothing(vector<int>& uf,
     Torus knots have too much regularity. Intermediate states rarely coincide, so hit rates top out around 24\% --- not enough to offset the lookup cost.
 
     \vspace{0.1cm}
+    \heading{Callgrind: Where the Time Goes}
+
+    Profiled with \texttt{valgrind -{}-tool=callgrind} (debug build, T(2,7)--T(2,13)):
+
+    \begin{center}
+    \begin{tabular}{rll}
+    \toprule
+    \textbf{Instrs.} & \textbf{Function} & \textbf{Cause} \\
+    \midrule
+    $>$20\% & \texttt{\_Rb\_tree} internals & \texttt{id\_map} inside \texttt{canonicalize()} \\
+    5.4\%   & \texttt{lexicographical\_compare} & cache key vector compare \\
+    4.8\%   & \texttt{uf\_find} & path compression \\
+    1.2\%   & \texttt{malloc}/\texttt{free} & temporary map per call \\
+    \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \vspace{0.05cm}
+    The \texttt{std::map<int,int> id\_map} inside \texttt{canonicalize()} is heap-allocated and destroyed on \emph{every} recursive call. Red-black tree operations alone exceed 20\% of all instructions --- directly explaining the 2--3$\times$ slowdown despite fewer calls.
+
+    \vspace{0.1cm}
     \textbf{The cache would pay off with:}
     \begin{itemize}\setlength\itemsep{0pt}
       \item Pretzel and composite knots: denser crossing interactions, likely 40--50\%+ hit rates
-      \item \texttt{std::unordered\_map} with custom hash: $O(1)$ average lookup instead of $O(\log n)$
-      \item Lazy canonicalization: skip computing the canonical form unless actually storing
+      \item \texttt{std::unordered\_map} with custom hash: $O(1)$ average lookup vs.\ current $O(\log n)$
+      \item Array-based canonicalization: replace \texttt{id\_map} with a \texttt{vector<int>[2n]}, eliminating all heap allocation per call
     \end{itemize}
   \end{block}
 
@@ -257,9 +278,9 @@ void apply_smoothing(vector<int>& uf,
     \vspace{0.1cm}
     \textbf{Future work:}
     \begin{itemize}\setlength\itemsep{0pt}
-      \item Profile with Valgrind/gprof to find where the overhead actually lives
       \item Test on pretzel and composite knots
       \item Implement \texttt{unordered\_map} with custom hash
+      \item Replace \texttt{id\_map} with a stack-allocated array to eliminate per-call heap churn
       \item Port to Raspberry Pi for embedded comparison
     \end{itemize}
   \end{block}

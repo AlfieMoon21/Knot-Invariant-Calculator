@@ -71,12 +71,38 @@ int next_remaining = remaining & ~(1 << c); // clear bit c
 
 Bitmask operations are O(1). Safe limit: 30 crossings with 32-bit signed int (shifting into bit 31 is undefined behaviour in C++; use `unsigned int` or `int64_t` to extend).
 
+### Profiling results (Valgrind callgrind)
+
+Profiled with `valgrind --tool=callgrind` on the debug binary (`-g -O0`) up to T(2,13).
+Full report in `callgrind_report.txt`. Top hotspots by instruction count:
+
+| % of instructions | Function | Where |
+|---|---|---|
+| 8.98% | `vector::operator[]` | UF path traversal in `uf_find` |
+| 6.21% | `vector::size()` | Called throughout `compute` and `canonicalize` |
+| **5.43%** | **`lexicographical_compare`** | **Cache key vector comparison on every lookup** |
+| **~20%+** | **`_Rb_tree` / `std::map` internals** | **`id_map` inside `canonicalize()`, allocated and destroyed per call** |
+| 4.80% | `uf_find` (two inlined variants) | Path compression |
+| 1.15% | `malloc` / `free` | Heap churn from temporary `id_map` per call |
+
+**Key finding:** the `std::map<int,int> id_map` inside `canonicalize()` is created and
+destroyed on every recursive call when the cache is enabled. The red-black tree
+operations (insert, find, lower_bound, destroy) account for over 20% of all instructions.
+On top of that, the cache key comparison (`vector<int>` lexicographic compare) adds
+another ~5.4%. Together these account for roughly 25–30% of all work — directly
+explaining why the cached version is 2–3× slower despite making 32.5% fewer recursive calls.
+
+The fix is clear from the data: replacing `std::map<int,int> id_map` with a plain
+array (possible since arc IDs are bounded by `2n`) eliminates all tree allocation overhead,
+and replacing the outer `std::map<CacheKey, Polynomial>` with an `unordered_map` with a
+custom hash removes the O(n) key comparison on every lookup.
+
 ### Possible future optimisations
 
-- **`std::unordered_map` with custom hash**: replaces O(log n) tree traversal with O(1) average lookup, which would significantly reduce cache overhead
+- **`std::unordered_map` with custom hash**: replaces O(log n) tree traversal with O(1) average lookup, directly addressing the ~20% instruction overhead identified by callgrind
+- **Array-based canonicalization**: replace `std::map<int,int> id_map` in `canonicalize()` with a `vector<int>` of size `2n` (IDs are bounded), eliminating heap allocation per call
 - **Lazy canonicalization**: canonicalize only when storing to cache, not on every lookup check
 - **More cache-friendly knot families**: pretzel and composite knots have higher crossing density and more coincidental intermediate states, which should yield hit rates of 40–50%+ where cache savings outweigh overhead
-- **Profile with gprof/valgrind**: `g++ -pg` + `gprof` gives function-level breakdown; `valgrind --tool=massif` tracks memory usage
 
 ---
 
