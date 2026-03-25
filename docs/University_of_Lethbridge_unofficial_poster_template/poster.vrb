@@ -1,0 +1,280 @@
+\begin{columns}[t]
+\separatorcolumn
+
+% ============ COLUMN 1 ============
+\begin{column}{\colwidth}
+
+  \begin{block}{The Knot Invariant Calculator}
+    A C++ application computing the Jones polynomial of mathematical knots via the Kauffman bracket algorithm.
+
+    \vspace{0.15cm}
+    Knots are closed curves in 3D space. The Jones polynomial distinguishes knot types and shows up in molecular biology, quantum physics, and polymer science. Computing it via the Kauffman bracket is $O(2^n)$ --- a 21-crossing knot needs 4.2 million recursive calls.
+
+    \vspace{0.15cm}
+    \textbf{Input:} Dowker--Thistlethwaite (DT) notation from databases like KnotInfo.
+
+    \textbf{Output:} Jones polynomial $V_K(A)$, verified against published tables.
+  \end{block}
+
+  \begin{alertblock}{The Naive Approach: History-Based Caching}
+    \heading{Initial Implementation}
+
+    Cache key: record which smoothings have been applied, e.g.\ \texttt{DiagramState\{0{\to}A,\ 1{\to}B,\ 2{\to}A\}}.
+
+    \vspace{0.1cm}
+    Crossings are always processed in ascending order (0, 1, 2, \ldots), creating a perfect binary tree where every root-to-leaf path is unique. No two branches ever reach the same state.
+
+    \vspace{0.1cm}
+    \begin{center}
+    \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Knot} & \textbf{n} & \textbf{Calls} & \textbf{Hits} & \textbf{Rate} \\
+    \midrule
+    Trefoil   & 3 &  15 & 0 & 0\% \\
+    Figure-8  & 4 &  31 & 0 & 0\% \\
+    T(2,7)    & 7 & 255 & 0 & 0\% \\
+    \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \vspace{0.1cm}
+    Every \texttt{cache.find()} returned \texttt{end()}. The cache stored entries and never used a single one. The reason, in hindsight: deterministic traversal means every path is unique, so no two branches ever share a state to cache.
+  \end{alertblock}
+
+  \begin{block}{Key Algorithm Features}
+    \heading{The Kauffman Bracket Expansion}
+
+    Each crossing is smoothed in two ways, creating a recursive binary tree:
+    \[
+      \langle K \rangle = A\cdot\langle \text{A-smooth} \rangle + A^{-1}\cdot\langle \text{B-smooth} \rangle
+    \]
+    \textbf{Base case:} When all crossings are smoothed, count resulting circles $k$:
+    \[
+      \langle k\text{ circles}\rangle = (-A^2 - A^{-2})^{k-1}
+    \]
+
+    \heading{Jones Polynomial}
+
+    Normalise the bracket by the writhe $w$:
+    \[
+      V_K(A) = (-A)^{-3w}\cdot\langle K\rangle
+    \]
+
+    \heading{Arc Endpoint Model}
+
+    A knot with $n$ crossings has $2n$ arc segments. Smoothing reconnects endpoints according to crossing orientation. Union-Find with path compression tracks connected components in $O(\alpha(n))$ amortised time.
+  \end{block}
+
+  \begin{block}{Implementation}
+    \textbf{Language \& containers:} C++17. \texttt{std::map<int,int>} stores sparse Laurent polynomials (power $\to$ coefficient); zero-coefficient terms are erased after each addition.
+
+    \vspace{0.1cm}
+    \textbf{Input parsing:} Each DT notation integer maps to one crossing. Sign encodes orientation ($+1$ or $-1$); absolute value gives the paired arc position in $[0,\,2n)$.
+
+    \vspace{0.1cm}
+    \textbf{Timing:} \texttt{std::chrono::high\_resolution\_clock} measures bracket computation alone, separate from Jones normalisation. Cached and uncached runs use fresh \texttt{KauffmanBracket} instances so neither warms the other's state.
+
+    \vspace{0.1cm}
+    \textbf{Build:} \texttt{g++ -std=c++17 -O2} via Makefile. Git history tracks the path from an early heuristic prototype to the topology-based cache.
+  \end{block}
+
+\end{column}
+
+\separatorcolumn
+
+% ============ COLUMN 2 ============
+\begin{column}{\colwidth}
+
+  \begin{exampleblock}{Solution: Topology-Based Caching}
+    \heading{The Key Idea}
+
+    Stop recording what smoothings were applied. Record what they produced.
+
+    \vspace{0.1cm}
+    Two different A/B choice sequences can reach the same arc connectivity with the same crossings still to process. At that point the remaining computation is identical --- the second branch can skip it entirely.
+
+    \vspace{0.1cm}
+    \textbf{Example (7 crossings):}
+    \begin{itemize}\setlength\itemsep{0pt}
+      \item Branch A: \ 0{\to}A,\ 1{\to}A,\ 2{\to}B,\ 3{\to}A $\Rightarrow$ connectivity $X$, crossings $\{4,5,6\}$ remain
+      \item Branch B: \ 0{\to}B,\ 1{\to}B,\ 2{\to}A,\ 3{\to}A $\Rightarrow$ connectivity $X$, crossings $\{4,5,6\}$ remain
+      \item \textbf{Cache hit.} Branch B reuses Branch A's result.
+    \end{itemize}
+
+    \vspace{0.1cm}
+    \heading{Cache Key Structure}
+
+\begin{lstlisting}
+struct CacheKey {
+    vector<int> connectivity; // canonical arc IDs
+    int remaining;            // bitmask: bit i = crossing i unsmoothed
+
+    bool operator<(const CacheKey& other) const {
+        if (remaining != other.remaining)
+            return remaining < other.remaining;
+        return connectivity < other.connectivity;
+    }
+};
+
+map<CacheKey, Polynomial> cache;
+\end{lstlisting}
+
+    \vspace{0.1cm}
+    The \texttt{remaining} bitmask clears bit $i$ via \texttt{remaining \& \textasciitilde(1 << i)}. \textbf{Safe limit: 30 crossings} with a 32-bit signed \texttt{int} (bit 31 shift is undefined behaviour in C++).
+  \end{exampleblock}
+
+  \begin{block}{Canonical Connectivity}
+    \heading{The Equivalence Problem}
+
+    Two Union-Find states may be structurally identical but differ in internal representation depending on construction order. Raw roots \texttt{[7,7,2,2]} and \texttt{[3,3,0,0]} encode the same pattern --- a canonical form is needed for cache comparisons to work.
+
+    \vspace{0.1cm}
+    \heading{Canonicalization Algorithm}
+
+\begin{lstlisting}
+vector<int> canonicalize(vector<int> uf, int n) {
+    vector<int> canonical(2 * n);
+    map<int,int> id_map;   // root -> canonical ID
+    int next_id = 0;
+
+    for (int i = 0; i < 2 * n; i++) {
+        int root = uf_find(uf, i);
+        if (id_map.find(root) == id_map.end())
+            id_map[root] = next_id++;
+        canonical[i] = id_map[root];
+    }
+    return canonical; // components numbered 0, 1, 2, ...
+}
+\end{lstlisting}
+
+    \vspace{0.1cm}
+    Endpoints scanned left-to-right, IDs assigned in order of first appearance. Two equivalent topologies always produce the same key regardless of how they were built.
+
+    \textbf{Complexity:} $O(2n \cdot \log k)$, $k$ = distinct components (typically $k < 5$).
+  \end{block}
+
+  \begin{block}{Smoothing Operations}
+    At each crossing, two arc endpoints arrive and two depart. A-smoothing and B-smoothing reconnect them in one of two patterns depending on crossing sign:
+
+\begin{lstlisting}
+void apply_smoothing(vector<int>& uf,
+        const pair<int,int>& pos, int sign, char type, int n) {
+    auto [p, q] = pos;
+    int before_p = (p - 1 + 2*n) % (2*n);
+    int before_q = (q - 1 + 2*n) % (2*n);
+    bool cross_connect = (type == 'A') == (sign > 0);
+    if (cross_connect) {
+        uf_unite(uf, before_p, q);
+        uf_unite(uf, before_q, p);
+    } else {
+        uf_unite(uf, before_p, before_q);
+        uf_unite(uf, p, q);
+    }
+}
+\end{lstlisting}
+
+    \vspace{0.1cm}
+    \textbf{Cross-connect} (A-smooth of positive crossing): joins the strand arriving at $p$ to the one leaving at $q$, and vice versa.
+
+    \textbf{Parallel-connect} (B-smooth of positive crossing): joins both arrivals and both departures, potentially merging or splitting components.
+  \end{block}
+
+\end{column}
+
+\separatorcolumn
+
+% ============ COLUMN 3 ============
+\begin{column}{\colwidth}
+
+  \begin{block}{Performance Results}
+    \heading{Call Count Reduction}
+
+    \begin{center}
+    \begin{tabular}{lcrrrr}
+    \toprule
+    \textbf{Knot} & \textbf{n} & \textbf{No cache} & \textbf{Cached} & \textbf{Hit rate} & \textbf{Saved} \\
+    \midrule
+    T(2,7)  &  7 &       255 &       211 & 10.4\% & 17.3\% \\
+    T(2,9)  &  9 &     1,023 &       791 & 14.7\% & 22.7\% \\
+    T(2,11) & 11 &     4,095 &     3,017 & 17.9\% & 26.3\% \\
+    T(2,13) & 13 &    16,383 &    11,675 & 20.2\% & 28.7\% \\
+    T(2,15) & 15 &    65,535 &    45,663 & 21.8\% & 30.3\% \\
+    \textbf{T(2,21)} & \textbf{21} & \textbf{4,194,303} & \textbf{2,831,623} & \textbf{24.1\%} & \textbf{32.5\%} \\
+    \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \vspace{0.1cm}
+    For T(2,21), 1.36 million calls are skipped. The topology key is finding duplicate subproblems.
+
+    \vspace{0.15cm}
+    \heading{Wall-Clock Time}
+
+    \begin{center}
+    \begin{tabular}{lcrrc}
+    \toprule
+    \textbf{Knot} & \textbf{n} & \textbf{No cache ($\mu$s)} & \textbf{Cached ($\mu$s)} & \textbf{Speedup} \\
+    \midrule
+    T(2,7)  &  7 &        61 &        132 & 0.46$\times$ \\
+    T(2,11) & 11 &       944 &      2{,}232 & 0.42$\times$ \\
+    T(2,15) & 15 &    16{,}947 &    58{,}971 & 0.29$\times$ \\
+    T(2,21) & 21 & 1{,}186{,}334 & 3{,}637{,}637 & 0.33$\times$ \\
+    \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \textit{Representative single-run measurements; variance $\pm$20\% between runs.}
+
+    \vspace{0.1cm}
+    Fewer calls, but slower. Each lookup requires \texttt{canonicalize()} --- a linear scan with \texttt{std::map} insertions --- followed by an $O(n)$ vector comparison in the cache lookup itself. At 20--24\% hit rates, that overhead costs more than it saves.
+
+    \vspace{0.1cm}
+    \heading{Verified Correctness}
+    \begin{itemize}\setlength\itemsep{0pt}
+      \item Figure-8 (4\textsubscript{1}): $A^8 - A^4 + 1 - A^{-4} + A^{-8}$ \checkmark
+      \item T(2,15): 10-term polynomial, powers spaced by 4 from $A^{-19}$ to $A^{17}$ \checkmark
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{Analysis: When Memoization Helps}
+    Torus knots have too much regularity. Intermediate states rarely coincide, so hit rates top out around 24\% --- not enough to offset the lookup cost.
+
+    \vspace{0.1cm}
+    \textbf{The cache would pay off with:}
+    \begin{itemize}\setlength\itemsep{0pt}
+      \item Pretzel and composite knots: denser crossing interactions, likely 40--50\%+ hit rates
+      \item \texttt{std::unordered\_map} with custom hash: $O(1)$ average lookup instead of $O(\log n)$
+      \item Lazy canonicalization: skip computing the canonical form unless actually storing
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{Design Decisions \& Future Work}
+    \textbf{Sparse polynomial storage:} \texttt{std::map<int,int>} stores only non-zero terms. T(2,15)'s bracket spans $A^{-19}$ to $A^{17}$ in steps of 4 --- 10 terms out of a possible range of 19.
+
+    \vspace{0.1cm}
+    \textbf{Value-based recursion:} Union-Find passed by value so each branch gets an independent copy. Straightforward for $n < 25$; would need rethinking at larger scales.
+
+    \vspace{0.1cm}
+    \textbf{Future work:}
+    \begin{itemize}\setlength\itemsep{0pt}
+      \item Profile with Valgrind/gprof to find where the overhead actually lives
+      \item Test on pretzel and composite knots
+      \item Implement \texttt{unordered\_map} with custom hash
+      \item Port to Raspberry Pi for embedded comparison
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{References}
+    \footnotesize
+    \begin{itemize}\setlength\itemsep{0pt}
+      \item Jones, V.\ F.\ R.\ (1985). \textit{A polynomial invariant for knots via von Neumann algebras}. Bull.\ Amer.\ Math.\ Soc., 12(1), 103--111.
+      \item Kauffman, L.\ H.\ (1987). \textit{State models and the Jones polynomial}. Topology, 26(3), 395--407.
+      \item Musfeldt, C.\ (2024). \textit{Development of a Python-Based Software for Calculating the Jones Polynomial}. Arizona State University.
+      \item KnotInfo: \texttt{https://knotinfo.math.indiana.edu}
+    \end{itemize}
+  \end{block}
+
+\end{column}
+
+\separatorcolumn
+\end{columns}

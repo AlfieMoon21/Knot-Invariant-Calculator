@@ -4,7 +4,7 @@
 // NOT USED IN THE CURRENT BUILD.
 //
 // DiagramState was the cache key in the original caching strategy: it stored the
-// full smoothing history (crossing id → 'A' or 'B') as the key. That produced zero
+// full smoothing history (crossing id mapped to 'A' or 'B') as the key. That produced zero
 // hits because the recursion always processes crossings in the same order, making
 // every history unique.
 //

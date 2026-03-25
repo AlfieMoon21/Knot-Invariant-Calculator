@@ -8,13 +8,13 @@ Mathematical background and algorithm details for the Kauffman bracket computati
 
 Dowker–Thistlethwaite (DT) notation represents a knot diagram as a list of integers.
 
-Walk along the knot and number each strand visit 1, 2, 3, ... up to 2n. Each crossing is visited twice — once on an odd strand, once on an even strand. The DT list records the even strand number for each odd visit, in order.
+Walk along the knot and number each strand visit 1, 2, 3, ... up to 2n. Each crossing is visited twice: once on an odd strand, once on an even strand. The DT list records the even strand number for each odd visit, in order.
 
 The **sign** of the DT value encodes the crossing type:
-- Positive → positive (right-handed) crossing
-- Negative → negative (left-handed) crossing
+- Positive: positive (right-handed) crossing
+- Negative: negative (left-handed) crossing
 
-**Example — trefoil `{4, 6, 2}`:**
+**Trefoil example `{4, 6, 2}`:**
 
 | i | dt[i] | sign | first_visit (2i) | second_visit (\|val\|−1) |
 |---|-------|------|-----------------|--------------------------|
@@ -24,7 +24,7 @@ The **sign** of the DT value encodes the crossing type:
 
 `first_visit` and `second_visit` are the 0-indexed arc positions where the crossing appears in the sequence `0..2n-1`. These are the "arriving" arc endpoints used by the smoothing algorithm.
 
-**Example — figure-eight `{6, -8, 2, -4}`:**
+**Figure-eight example `{6, -8, 2, -4}`:**
 
 | i | dt[i] | sign | first_visit | second_visit |
 |---|-------|------|-------------|--------------|
@@ -33,21 +33,21 @@ The **sign** of the DT value encodes the crossing type:
 | 2 | 2     | +1   | 4           | 1            |
 | 3 | -4    | -1   | 6           | 3            |
 
-DT notation encodes a specific diagram, not the knot type — two diagrams of the same knot can have different DT notations. The Jones polynomial is diagram-independent, so it corrects for this.
+DT notation encodes a specific diagram, not the knot type; two diagrams of the same knot can have different DT notations. The Jones polynomial is diagram-independent, so it corrects for this.
 
 ---
 
 ## Laurent Polynomials
 
-The Kauffman bracket and Jones polynomial are **Laurent polynomials** — polynomials where powers can be negative, e.g. `A³ + 2A⁻¹ − 1`.
+The Kauffman bracket and Jones polynomial are **Laurent polynomials**: polynomials where powers can be negative, e.g. `A³ + 2A⁻¹ − 1`.
 
-Stored as `std::map<int, int>` mapping power → coefficient. Only non-zero terms are stored; a term is erased when its coefficient reaches zero.
+Stored as `std::map<int, int>` mapping power to coefficient. Only non-zero terms are stored; a term is erased when its coefficient reaches zero.
 
 Key operations:
-- `add_term(p, c)` — adds `c·Aᵖ`, erases if result is zero
-- `operator+` — term-by-term addition
-- `operator*` — polynomial multiplication (add exponents, multiply coefficients)
-- `multiply_by_A(k)` — shifts all powers by k; much faster than full multiplication
+- `add_term(p, c)`: adds `c·Aᵖ`, erases if result is zero
+- `operator+`: term-by-term addition
+- `operator*`: polynomial multiplication (add exponents, multiply coefficients)
+- `multiply_by_A(k)`: shifts all powers by k; much faster than full multiplication
 
 ---
 
@@ -105,11 +105,11 @@ The union-find is passed **by value** so each branch gets an independent copy.
 A knot with n crossings has 2n arc segments. Each crossing involves four arc endpoints:
 
 ```
-... → before_p → [crossing] → p → ...
-... → before_q → [crossing] → q → ...
+... -> before_p -> [crossing] -> p -> ...
+... -> before_q -> [crossing] -> q -> ...
 ```
 
-`p` and `q` are the arcs arriving at the crossing (stored in `crossing_positions`). `before_p` and `before_q` are the arcs departing on the other strand — in the cyclic sequence they are at positions `(p−1+2n) % 2n` and `(q−1+2n) % 2n`.
+`p` and `q` are the arcs arriving at the crossing (stored in `crossing_positions`). `before_p` and `before_q` are the arcs departing on the other strand; in the cyclic sequence they are at positions `(p−1+2n) % 2n` and `(q−1+2n) % 2n`.
 
 **Smoothing reconnects these four endpoints into two pairs:**
 
@@ -165,7 +165,7 @@ int sign_factor = (w % 2 == 0) ? 1 : -1;
 return raw.multiply_by_A(-3 * w) * sign_poly;
 ```
 
-**Example — right-handed trefoil `{4, 6, 2}`, writhe w = 3:**
+**Right-handed trefoil example `{4, 6, 2}`, writhe w = 3:**
 
 ```
 <K>         = −A⁻¹⁶ + A⁻¹² + A⁻⁴
@@ -181,7 +181,7 @@ Under the substitution `A = t^{−1/4}` this gives `V_K(t) = −t⁻⁴ + t⁻³
 
 ### Why naive caching fails
 
-Processing crossings in fixed order (0, 1, 2, ...) creates a perfect binary tree — every root-to-leaf path is unique. A cache keyed on smoothing history gets **zero hits**, because no two branches ever share a history.
+Processing crossings in fixed order (0, 1, 2, ...) creates a perfect binary tree, meaning every root-to-leaf path is unique. A cache keyed on smoothing history gets **zero hits**, because no two branches ever share a history.
 
 ```
               [0,1,2]
@@ -195,7 +195,7 @@ Processing crossings in fixed order (0, 1, 2, ...) creates a perfect binary tree
 
 Cache key = **(canonical arc connectivity, remaining-crossings bitmask)**
 
-Two different A/B choice sequences can produce the same arc connectivity with the same crossings still to process. When that happens, the bracket of the remaining diagram is identical — so the second arrival skips the entire subtree.
+Two different A/B choice sequences can produce the same arc connectivity with the same crossings still to process. When that happens, the bracket of the remaining diagram is identical, so the second arrival skips the entire subtree.
 
 ```cpp
 struct CacheKey {
@@ -214,8 +214,8 @@ struct CacheKey {
 Two union-find states with different internal representation may encode the same connectivity. Canonicalization fixes this: scan endpoints 0..2n−1, assign component IDs 0, 1, 2, ... in order of first appearance.
 
 ```
-Raw roots [7, 7, 2, 2]  →  canonical [0, 0, 1, 1]
-Raw roots [3, 3, 5, 5]  →  canonical [0, 0, 1, 1]  ← cache hit
+Raw roots [7, 7, 2, 2]  =>  canonical [0, 0, 1, 1]
+Raw roots [3, 3, 5, 5]  =>  canonical [0, 0, 1, 1]  (cache hit)
 ```
 
 ### Measured cache performance (torus knots T(2,n))
@@ -229,7 +229,7 @@ Raw roots [3, 3, 5, 5]  →  canonical [0, 0, 1, 1]  ← cache hit
 | T(2,15)| 15 |          65,535 |         45,663 |   21.8%  |      30.3%  |
 | T(2,21)| 21 |       4,194,303 |      2,831,623 |   24.1%  |      32.5%  |
 
-Hit rates grow with n as larger knots provide more opportunity for smoothing paths to converge. However, for torus knots specifically the overhead of canonicalization and `std::map` lookups exceeds the savings — see [`DEVELOPMENT.md`](DEVELOPMENT.md) for the wall-clock analysis.
+Hit rates grow with n as larger knots provide more opportunity for smoothing paths to converge. However, for torus knots specifically the overhead of canonicalization and `std::map` lookups exceeds the savings; see [`DEVELOPMENT.md`](DEVELOPMENT.md) for the wall-clock analysis.
 
 ---
 

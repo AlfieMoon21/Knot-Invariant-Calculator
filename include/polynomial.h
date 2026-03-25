@@ -5,7 +5,7 @@
 #include <iostream>
 
 // Sparse Laurent polynomial in A with integer coefficients.
-// Stored as a map of power → coefficient; zero-coefficient terms are erased.
+// Stored as a map of power to coefficient; zero-coefficient terms are erased.
 //
 // OPTIMISATION: sparse storage matters here. Kauffman bracket polynomials have
 // O(n) non-zero terms despite spanning a power range of O(n), so a dense array

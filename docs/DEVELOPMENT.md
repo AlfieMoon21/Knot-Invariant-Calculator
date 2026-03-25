@@ -10,7 +10,7 @@ Implementation details, optimization analysis, code walkthrough, and development
 
 | Structure | Storage | Purpose |
 |-----------|---------|---------|
-| `Polynomial` | `std::map<int,int>` power→coeff | Sparse Laurent polynomial; zero terms auto-erased |
+| `Polynomial` | `std::map<int,int>` power to coeff | Sparse Laurent polynomial; zero terms auto-erased |
 | Union-find | `std::vector<int>` parent array | Arc connectivity; path compression for O(α(n)) find |
 | `CacheKey` | `vector<int>` + `int` | Canonical connectivity + remaining-crossings bitmask |
 | Cache | `std::map<CacheKey, Polynomial>` | Memoization store |
@@ -33,7 +33,7 @@ All headers are in `include/`. The Makefile also provides `make run` and `make c
 
 ### 1. Topology-based memoization
 
-**Problem:** Naive recursion processes crossings in order 0, 1, 2, ... forming a perfect binary tree. Every path is unique — a history-based cache gets zero hits.
+**Problem:** Naive recursion processes crossings in order 0, 1, 2, ... forming a perfect binary tree. Every path is unique, so a history-based cache gets zero hits.
 
 **Solution:** Cache key = (canonical arc connectivity, remaining-crossings bitmask). Two different A/B choice sequences that reach the same connectivity with the same crossings remaining share a cached result.
 
@@ -45,7 +45,7 @@ All headers are in `include/`. The Makefile also provides `make run` and `make c
 
 `std::map<int,int>` stores only non-zero terms. `add_term` erases a term when its coefficient reaches zero. T(2,15)'s bracket has only 10 non-zero terms spanning powers −19 to +17.
 
-`multiply_by_A(k)` shifts all map keys by k in O(terms) — much faster than full polynomial multiplication.
+`multiply_by_A(k)` shifts all map keys by k in O(terms), much faster than full polynomial multiplication.
 
 ### 3. Incremental union-find
 
@@ -59,7 +59,7 @@ Polynomial smooth_A = compute(uf_A, ...);
 
 ### 4. Bitmask for remaining crossings
 
-The set of unsmoothed crossings is a single `int` bitmask — crossing i is unsmoothed iff bit i is set.
+The set of unsmoothed crossings is a single `int` bitmask: crossing i is unsmoothed iff bit i is set.
 
 ```cpp
 int remaining = (1 << n) - 1;  // all n bits set
@@ -73,10 +73,10 @@ Bitmask operations are O(1). Safe limit: 30 crossings with 32-bit signed int (sh
 
 ### Possible future optimisations
 
-- **`std::unordered_map` with custom hash** — replaces O(log n) tree traversal with O(1) average lookup, which would significantly reduce cache overhead
-- **Lazy canonicalization** — canonicalize only when storing to cache, not on every lookup check
-- **More cache-friendly knot families** — pretzel and composite knots have higher crossing density and more coincidental intermediate states, which should yield hit rates of 40–50%+ where cache savings outweigh overhead
-- **Profile with gprof/valgrind** — `g++ -pg` + `gprof` gives function-level breakdown; `valgrind --tool=massif` tracks memory usage
+- **`std::unordered_map` with custom hash**: replaces O(log n) tree traversal with O(1) average lookup, which would significantly reduce cache overhead
+- **Lazy canonicalization**: canonicalize only when storing to cache, not on every lookup check
+- **More cache-friendly knot families**: pretzel and composite knots have higher crossing density and more coincidental intermediate states, which should yield hit rates of 40–50%+ where cache savings outweigh overhead
+- **Profile with gprof/valgrind**: `g++ -pg` + `gprof` gives function-level breakdown; `valgrind --tool=massif` tracks memory usage
 
 ---
 
@@ -94,7 +94,7 @@ A crossing is its position (0-indexed) and sign (+1 or −1, derived from DT sig
 
 Sparse Laurent polynomial over `std::map<int,int>`. See [`ALGORITHM.md`](ALGORITHM.md#laurent-polynomials) for the maths. The `print()` method iterates in reverse (highest power first), suppresses coefficient 1 when there is a variable, and handles leading negatives separately from interior ` − ` separators.
 
-### `knot.h` — `KnotDiagram`
+### `knot.h`: `KnotDiagram`
 
 Parses DT notation into two parallel arrays: `crossings` (signs) and `crossing_positions` (arc position pairs).
 
@@ -103,21 +103,21 @@ int first_visit  = 2 * i;
 int second_visit = std::abs(value) - 1;
 ```
 
-`num_components` is initialised to 1 but not updated during computation — component counting is done via union-find in `kauffman.h`.
+`num_components` is initialised to 1 but not updated during computation; component counting is done via union-find in `kauffman.h`.
 
-### `kauffman.h` — `KauffmanBracket`
+### `kauffman.h`: `KauffmanBracket`
 
 The core class. Contains the union-find helpers, `apply_smoothing`, `canonicalize`, `compute_delta_power`, `compute` (the recursive core), `bracket` (public entry), and `jones` (normalisation).
 
-**`uf_find`** uses path compression — after finding the root, every node on the path is pointed directly at the root, making future lookups O(1).
+**`uf_find`**: uses path compression. After finding the root, every node on the path is pointed directly at it, making future lookups O(1).
 
-**`apply_smoothing`** — the geometric heart. Determines whether to cross-connect or parallel-connect the four arc endpoints at a crossing based on `(type == 'A') == (sign > 0)`. See [`ALGORITHM.md`](ALGORITHM.md#arc-endpoints-and-smoothing) for the truth table.
+**`apply_smoothing`**: the geometric heart. Determines whether to cross-connect or parallel-connect the four arc endpoints at a crossing based on `(type == 'A') == (sign > 0)`. See [`ALGORITHM.md`](ALGORITHM.md#arc-endpoints-and-smoothing) for the truth table.
 
-**`compute`** — picks the lowest unsmoothed crossing (consistent choice ensures different branches converge to the same next subproblem), copies the union-find for each branch, recurses, and combines via `A·<A> + A⁻¹·<B>`. Cache lookup happens before branching; cache store happens after combining.
+**`compute`**: picks the lowest unsmoothed crossing (consistent choice ensures different branches converge to the same next subproblem), copies the union-find for each branch, recurses, and combines via `A·<A> + A⁻¹·<B>`. Cache lookup happens before branching; cache store happens after combining.
 
-**`bracket`** — resets call count, cache hits, and cache before each run. Initialises union-find with `std::iota` (each endpoint is its own component) and bitmask with all n bits set.
+**`bracket`**: resets call count, cache hits, and cache before each run. Initialises union-find with `std::iota` (each endpoint is its own component) and bitmask with all n bits set.
 
-**`jones`** — calls `bracket()` internally and applies the writhe correction. Note: in `main.cpp` the benchmark calls `bracket()` and then `jones()` separately, so the bracket is computed twice per benchmark pass. This is a minor inefficiency in the benchmark, not in the algorithm itself.
+**`jones`**: calls `bracket()` internally and applies the writhe correction. Note: in `main.cpp` the benchmark calls `bracket()` and then `jones()` separately, so the bracket is computed twice per benchmark pass. This is a minor inefficiency in the benchmark, not in the algorithm itself.
 
 ### End-to-end example: trefoil `{4, 6, 2}`
 
@@ -125,8 +125,8 @@ The core class. Contains the union-find helpers, `apply_smoothing`, `canonicaliz
 2. `bracket()` sets up `uf=[0,1,2,3,4,5]`, `remaining=0b111=7`
 3. `compute` picks crossing 0 (`p=0, q=3`):
    - `before_p=(0-1+6)%6=5`, `before_q=(3-1+6)%6=2`
-   - A-smooth (cross): unite `(5,3)` and `(2,0)` → endpoints 0,2 connected; 3,5 connected
-   - B-smooth (parallel): unite `(5,2)` and `(0,3)` → endpoints 2,5 connected; 0,3 connected
+   - A-smooth (cross): unite `(5,3)` and `(2,0)`, giving endpoints 0,2 connected and 3,5 connected
+   - B-smooth (parallel): unite `(5,2)` and `(0,3)`, giving endpoints 2,5 connected and 0,3 connected
 4. Each branch recurses with `remaining=0b110=6`, then `=0b100=4`, then `=0`
 5. Leaves count circles via `std::set` of roots; result bubbles up via skein relation
 
@@ -141,13 +141,13 @@ Jones V_K(A) = A^-4 + A^-12 - A^-16
 
 ## Development Log
 
-### Week 2 — Thursday
+### Week 2, Thursday
 - Project proposed: Jones polynomial calculator
 - Initial repository structure created
 - Researching Kauffman bracket algorithm
 - Setting up C++ development environment
 
-### Thursday Evening — Week 2
+### Thursday Evening, Week 2
 - Implemented Laurent polynomial class
 - Basic arithmetic operations working (addition, multiplication)
 - Implemented first version of Kauffman bracket recursion
@@ -170,7 +170,7 @@ Jones V_K(A) = A^-4 + A^-12 - A^-16
 - Figure-8: `A⁸ − A⁴ + 1 − A⁻⁴ + A⁻⁸` ✓
 
 ### Cache development
-- First attempt: history-based cache key (`DiagramState` with smoothing map) → 0 cache hits
+- First attempt: history-based cache key (`DiagramState` with smoothing map): 0 cache hits
 - Diagnosed: deterministic traversal order means every path is unique; history-based keys are structurally incapable of matching
 - Solution: topology-based key (canonical arc connectivity + remaining bitmask)
 - Result: hit rates grow from 10% at 7 crossings to 24% at 21 crossings
