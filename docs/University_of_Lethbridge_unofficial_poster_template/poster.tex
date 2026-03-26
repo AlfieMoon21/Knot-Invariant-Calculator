@@ -337,7 +337,7 @@ void apply_smoothing(vector<int>& uf,
     \vspace{0.1cm}
     \textbf{The cache would pay off with:}
     \begin{itemize}\setlength\itemsep{0pt}
-      \item Pretzel and composite knots: denser crossing interactions, likely 40--50\%+ hit rates
+      \item Knots with more complex topology: torus knots are too regular; knot families with denser crossing interactions may produce more coincident subproblems and higher hit rates
       \item \texttt{std::unordered\_map} with custom hash: $O(1)$ average lookup vs.\ current $O(\log n)$
       \item Array-based canonicalization: replace \texttt{id\_map} with a \texttt{vector<int>[2n]}, eliminating all heap allocation per call
     \end{itemize}

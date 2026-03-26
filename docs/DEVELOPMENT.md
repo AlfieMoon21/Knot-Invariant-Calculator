@@ -102,7 +102,7 @@ custom hash removes the O(n) key comparison on every lookup.
 - **`std::unordered_map` with custom hash**: replaces O(log n) tree traversal with O(1) average lookup, directly addressing the ~20% instruction overhead identified by callgrind
 - **Array-based canonicalization**: replace `std::map<int,int> id_map` in `canonicalize()` with a `vector<int>` of size `2n` (IDs are bounded), eliminating heap allocation per call
 - **Lazy canonicalization**: canonicalize only when storing to cache, not on every lookup check
-- **More cache-friendly knot families**: pretzel and composite knots have higher crossing density and more coincidental intermediate states, which should yield hit rates of 40–50%+ where cache savings outweigh overhead
+- **More cache-friendly knot families**: torus knots are too regular; knot families with denser crossing interactions may produce more coincident subproblems, though hit rates are also sensitive to DT encoding — the same knot with a different labeling can go from 14.7% hits to 0%
 
 ---
 

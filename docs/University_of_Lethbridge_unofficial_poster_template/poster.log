@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.24.0 (TeX Live 2026/Arch Linux)  (format=lualatex 2026.3.25)  25 MAR 2026 14:48
+This is LuaHBTeX, Version 1.24.0 (TeX Live 2026/Arch Linux)  (format=lualatex 2026.3.25)  26 MAR 2026 12:25
  restricted system commands enabled.
  file:line:error style messages enabled.
 **/home/moon/Uni/Knot-Invariant-Calculator/docs/University_of_Lethbridge_unofficial_poster_template/poster
@@ -1710,7 +1710,7 @@ LaTeX Font Info:    External font `cmex7' loaded for size
  (./poster.vrb
 LaTeX Font Info:    Calculating math sizes for size <23.64> on input line 11.
 )
-Overfull \vbox (64.13774pt too high) detected at line 376
+Overfull \vbox (92.63774pt too high) detected at line 376
  []
 
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
@@ -1736,15 +1736,15 @@ Package rerunfilecheck Info: File `poster.out' has not changed.
 
 Here is how much of LuaTeX's memory you used:
  42082 strings out of 476076
- 1164441,1977958 words of node,token memory allocated
- 299419 words of node memory still in use:
-   8497 hlist, 55 vlist, 4477 rule, 963 disc, 171 local_par, 100 math, 7527 glue, 8535 kern, 300 penalty, 7753 glyph, 3910 attribute, 82 glue_spec, 3910 attribute_list, 4 write, 184 pdf_literal, 656 pdf_colorstack nodes
-   avail lists: 1:2,2:418,3:1486,4:2139,5:25721,6:524,7:46847,8:25,9:39254,10:28,11:2913
+ 1164432,1977958 words of node,token memory allocated
+ 300262 words of node memory still in use:
+   8498 hlist, 55 vlist, 4477 rule, 972 disc, 171 local_par, 100 math, 7542 glue, 8547 kern, 301 penalty, 7834 glyph, 3910 attribute, 82 glue_spec, 3910 attribute_list, 4 write, 184 pdf_literal, 656 pdf_colorstack nodes
+   avail lists: 1:1,2:418,3:1489,4:2139,5:25757,6:524,7:47135,8:25,9:39257,10:28,11:2940
  63273 multiletter control sequences out of 65536+600000
  121 fonts using 22369287 bytes
  128i,18n,116p,820b,1810s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-LightItalic.ttf></usr/share/texmf-dist/fonts/opentype/public/lm/lmroman17-regular.otf></usr/share/texmf-dist/fonts/opentype/public/lm/lmmono12-regular.otf></usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-Bold.ttf></usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-Regular.ttf></usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-Light.ttf></usr/share/texmf-dist/fonts/opentype/impallari/raleway/Raleway-Regular.otf></usr/share/texmf-dist/fonts/opentype/impallari/raleway/Raleway-Bold.otf></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on poster.pdf (1 page, 149686 bytes).
+Output written on poster.pdf (1 page, 149738 bytes).
 
 PDF statistics: 108 PDF objects out of 1000 (max. 8388607)
  63 compressed objects within 1 object stream
