@@ -139,7 +139,7 @@ private:
 
     // Recursive Kauffman bracket.
     //   uf        : arc connectivity built up incrementally as crossings are smoothed
-    //   remaining : bitmask of crossings not yet smoothed
+    //   remaining   : bitmask of crossings not yet smoothed
     //   n         : total number of crossings
     Polynomial compute(
         std::vector<int> uf,
@@ -150,7 +150,7 @@ private:
     {
         call_count++;
 
-        // Base case: all crossings smoothed. Count distinct circles (union-find roots)
+        // Base case: all crossings smothed. Count distinct circles (union-find roots)
         // and return δ^(circles-1).
         if (remaining == 0) {
             std::set<int> roots;

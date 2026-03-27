@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.24.0 (TeX Live 2026/Arch Linux)  (format=lualatex 2026.3.25)  26 MAR 2026 12:25
+This is LuaHBTeX, Version 1.24.0 (TeX Live 2026/Arch Linux)  (format=lualatex 2026.3.25)  27 MAR 2026 12:06
  restricted system commands enabled.
  file:line:error style messages enabled.
 **/home/moon/Uni/Knot-Invariant-Calculator/docs/University_of_Lethbridge_unofficial_poster_template/poster
@@ -1709,11 +1709,22 @@ LaTeX Font Info:    External font `cmex7' loaded for size
 \openout4 = poster.vrb
  (./poster.vrb
 LaTeX Font Info:    Calculating math sizes for size <23.64> on input line 11.
-)
-Overfull \vbox (92.63774pt too high) detected at line 376
+LaTeX Font Info:    Calculating math sizes for size <13.68> on input line 48.
+LaTeX Font Info:    External font `cmex7' loaded for size
+(Font)              <6.84> on input line 48.
+Package pgfplots info on input line 304: Using 'lua backend=false' for axis: ymode=log unsupported (yet).
+LaTeX Font Info:    Calculating math sizes for size <16.42> on input line 317.
+
+Underfull \hbox (badness 10000) in paragraph at lines 366--367
+[]\TU/Lato(1)/m/n/23.64 Two im-ple-men-ta-tion fixes would help re-gard-less of knot fam-ily: re-place \TU/lmtt/m/n/23.64 std::map \TU/Lato(1)/m/n/23.64 with
  []
 
-[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
+
+Underfull \hbox (badness 2057) in paragraph at lines 366--367
+\TU/lmtt/m/n/23.64 std::unordered_map \TU/Lato(1)/m/n/23.64 ($\OML/cmm/m/it/23.64 O\OT1/cmr/m/n/23.64 (1)$ \TU/Lato(1)/m/n/23.64 av-er-age lookup in-stead of $\OML/cmm/m/it/23.64 O\OT1/cmr/m/n/23.64 ([] \OML/cmm/m/it/23.64 n\OT1/cmr/m/n/23.64 )$\TU/Lato(1)/m/n/23.64 ), and lazily canon-i-cal-ize --- skip
+ []
+
+) [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 ]
 \tf@nav=\write6
@@ -1735,19 +1746,19 @@ Package rerunfilecheck Info: File `poster.out' has not changed.
 )
 
 Here is how much of LuaTeX's memory you used:
- 42082 strings out of 476076
- 1164432,1977958 words of node,token memory allocated
- 300262 words of node memory still in use:
-   8498 hlist, 55 vlist, 4477 rule, 972 disc, 171 local_par, 100 math, 7542 glue, 8547 kern, 301 penalty, 7834 glyph, 3910 attribute, 82 glue_spec, 3910 attribute_list, 4 write, 184 pdf_literal, 656 pdf_colorstack nodes
-   avail lists: 1:1,2:418,3:1489,4:2139,5:25757,6:524,7:47135,8:25,9:39257,10:28,11:2940
- 63273 multiletter control sequences out of 65536+600000
- 121 fonts using 22369287 bytes
- 128i,18n,116p,820b,1810s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-LightItalic.ttf></usr/share/texmf-dist/fonts/opentype/public/lm/lmroman17-regular.otf></usr/share/texmf-dist/fonts/opentype/public/lm/lmmono12-regular.otf></usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-Bold.ttf></usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-Regular.ttf></usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-Light.ttf></usr/share/texmf-dist/fonts/opentype/impallari/raleway/Raleway-Regular.otf></usr/share/texmf-dist/fonts/opentype/impallari/raleway/Raleway-Bold.otf></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on poster.pdf (1 page, 149738 bytes).
+ 42783 strings out of 476076
+ 1455551,1977958 words of node,token memory allocated
+ 317365 words of node memory still in use:
+   8797 hlist, 64 vlist, 4467 rule, 975 disc, 164 local_par, 128 math, 8222 glue, 8546 kern, 286 penalty, 8130 glyph, 5225 attribute, 82 glue_spec, 5225 attribute_list, 4 write, 960 pdf_literal, 622 pdf_colorstack nodes
+   avail lists: 1:4,2:418,3:3772,4:2037,5:25754,6:503,7:50147,8:25,9:40151,10:29,11:2949
+ 63974 multiletter control sequences out of 65536+600000
+ 165 fonts using 26788103 bytes
+ 128i,23n,116p,820b,3026s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/share/texmf-dist/fonts/opentype/public/lm/lmroman17-regular.otf></usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-LightItalic.ttf></usr/share/texmf-dist/fonts/opentype/public/lm/lmmono12-regular.otf></usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-Bold.ttf></usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-Regular.ttf></usr/share/texmf-dist/fonts/truetype/typoland/lato/Lato-Light.ttf></usr/share/texmf-dist/fonts/opentype/impallari/raleway/Raleway-Regular.otf></usr/share/texmf-dist/fonts/opentype/impallari/raleway/Raleway-Bold.otf></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
+Output written on poster.pdf (1 page, 183007 bytes).
 
-PDF statistics: 108 PDF objects out of 1000 (max. 8388607)
- 63 compressed objects within 1 object stream
+PDF statistics: 124 PDF objects out of 1000 (max. 8388607)
+ 75 compressed objects within 1 object stream
  3 named destinations out of 1000 (max. 1048576)
  16 words of extra memory for PDF output out of 10000 (max. 100000000)
 
